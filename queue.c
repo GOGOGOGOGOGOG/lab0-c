@@ -25,16 +25,30 @@
 queue_t *q_new()
 {
     queue_t *q = malloc(sizeof(queue_t));
-    /* What if malloc returned NULL? */
-    q->head = NULL;
+    if (q != NULL) {
+        q->head = NULL;
+        q->tail = NULL;
+        q->size = 0;
+    }
     return q;
 }
 
 /* Free all storage used by queue */
 void q_free(queue_t *q)
 {
-    /* How about freeing the list elements and the strings? */
-    /* Free queue structure */
+    if (q == NULL)
+        return;
+
+    list_ele_t *access = q->head;  //將access指向qhead
+
+    while (access != NULL) {  //檢查access是否為NULL
+        q->head = access;
+        access = access->next;
+        q->tail = NULL;
+        free(q->head->value);
+        free(q->head);
+    }
+
     free(q);
 }
 
@@ -47,13 +61,29 @@ void q_free(queue_t *q)
  */
 bool q_insert_head(queue_t *q, char *s)
 {
-    list_ele_t *newh;
-    /* What should you do if the q is NULL? */
-    newh = malloc(sizeof(list_ele_t));
-    /* Don't forget to allocate space for the string and copy it */
-    /* What if either call to malloc returns NULL? */
+    if (q == NULL)
+        return false;
+
+    list_ele_t *newh = (list_ele_t *) malloc(sizeof(list_ele_t));
+    if (newh == NULL)
+        return false;
+
+    newh->value =
+        (char *) malloc((sizeof(s) / sizeof(s[0])) +
+                        1);  //因為s是從0開始要加一才能表示其真正所需的記憶體
+    if (!newh->value) {
+        free(newh);
+        return false;
+    }
+    strcpy(newh->value, s);  //將接受的字串指標s傳入newh的value中
+
+    if (q->size == 0) {
+        q->tail = newh;
+    }
     newh->next = q->head;
-    q->head = newh;
+    q->head = newh;  // newh所存的位址指派給q的head中
+    q->size++;
+
     return true;
 }
 
@@ -67,9 +97,36 @@ bool q_insert_head(queue_t *q, char *s)
  */
 bool q_insert_tail(queue_t *q, char *s)
 {
-    /* You need to write the complete code for this function */
-    /* Remember: It should operate in O(1) time */
-    return false;
+    if (q == NULL)
+        return false;
+
+    list_ele_t *newh = (list_ele_t *) malloc(sizeof(list_ele_t));
+    if (newh == NULL)
+        return false;
+
+    newh->value = (char *) malloc((sizeof(s) / sizeof(s[0])) + 1);
+    if (newh->value == NULL) {
+        free(newh);
+        return false;
+    }
+    strcpy(newh->value, s);
+
+    newh->next = NULL;
+    if (q->size != 0) {
+        q->tail->next = newh;
+    } else {
+        q->head = newh;  //把newh的位址傳給qhead
+
+        newh->next = NULL;
+    }
+    q->tail = newh;
+    q->size++;
+
+    return true;
+
+    // if (newh != NULL) {
+    // newh->next = q->head;
+    // newh->value = strdup(s);}
 }
 
 /*
@@ -82,8 +139,24 @@ bool q_insert_tail(queue_t *q, char *s)
 */
 bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
 {
-    /* You need to fix up this code. */
-    q->head = q->head->next;
+    // if queue is NULL or empty
+    if (q == NULL || q->size == 0)
+        return false;
+
+    int size;
+    // if sp is non-NULL
+    if (sp != NULL) {
+        size = strlen(q->head->value);
+        size = size > bufsize - 1 ? bufsize - 1 : size;
+        strncpy(sp, q->head->value, size);
+        sp[size] = '\0';
+    }
+
+    list_ele_t *temp = q->head;
+    q->head = temp->next;
+    q->size--;
+    free(temp->value);
+    free(temp);
     return true;
 }
 
@@ -95,7 +168,7 @@ int q_size(queue_t *q)
 {
     /* You need to write the code for this function */
     /* Remember: It should operate in O(1) time */
-    return 0;
+    return (q != NULL) ? q->size : 0;
 }
 
 /*
@@ -107,5 +180,19 @@ int q_size(queue_t *q)
  */
 void q_reverse(queue_t *q)
 {
-    /* You need to write the code for this function */
+    if (!q || q->size == 0)
+        return;
+
+    list_ele_t *last = NULL;
+    list_ele_t *current;
+    q->tail = q->head;
+
+    while (current != NULL) {
+        current = q->head->next;
+        q->head->next = last;
+
+        last = q->head;
+        q->head = current;
+    }
+    q->head = last;
 }
