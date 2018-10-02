@@ -61,6 +61,7 @@ void q_free(queue_t *q)
  */
 bool q_insert_head(queue_t *q, char *s)
 {
+   list_ele_t *ptr;
     if (q == NULL)
         return false;
 
@@ -77,10 +78,17 @@ bool q_insert_head(queue_t *q, char *s)
     }
     strcpy(newh->value, s);  //將接受的字串指標s傳入newh的value中
 
+
+
+    ptr = q->head;     //將前一個結構位址儲存在ptr中
+    newh->next = ptr;  //將新創的結構指向之前生成的結構
+
     if (q->size == 0) {
         q->tail = newh;
     }
-    newh->next = q->head;
+
+
+
     q->head = newh;  // newh所存的位址指派給q的head中
     q->size++;
 
@@ -96,7 +104,8 @@ bool q_insert_head(queue_t *q, char *s)
   The function must explicitly allocate space and copy the string into it.
  */
 bool q_insert_tail(queue_t *q, char *s)
-{
+{// list_ele_t *ptr2=q->tail;
+
     if (q == NULL)
         return false;
 
@@ -114,6 +123,7 @@ bool q_insert_tail(queue_t *q, char *s)
     newh->next = NULL;
     if (q->size != 0) {
         q->tail->next = newh;
+        // ptr2->next = newh;
     } else {
         q->head = newh;  //把newh的位址傳給qhead
 
