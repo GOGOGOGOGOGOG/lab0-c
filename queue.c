@@ -44,11 +44,15 @@ void q_free(queue_t *q)
     while (access != NULL) {  //檢查access是否為NULL
         q->head = access;
         access = access->next;
-        q->tail = NULL;
+
         free(q->head->value);
+
+
         free(q->head);
+        q->size--;
     }
 
+    access = NULL;
     free(q);
 }
 
