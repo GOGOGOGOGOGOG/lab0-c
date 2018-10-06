@@ -49,6 +49,7 @@ void q_free(queue_t *q)
 
 
         free(q->head);
+
         q->size--;
     }
 
@@ -73,15 +74,14 @@ bool q_insert_head(queue_t *q, char *s)
     if (newh == NULL)
         return false;
 
-    newh->value =
-        (char *) malloc((sizeof(s) / sizeof(s[0])) +
-                        1);  //因為s是從0開始要加一才能表示其真正所需的記憶體
+    newh->value = (char *) malloc(
+        strlen(s) + 1);  //因為s是從0開始要加一才能表示其真正所需的記憶體
     if (!newh->value) {
         free(newh);
         return false;
     }
     strcpy(newh->value, s);  //將接受的字串指標s傳入newh的value中
-
+    s = NULL;
 
 
     ptr = q->head;     //將前一個結構位址儲存在ptr中
@@ -118,12 +118,13 @@ bool q_insert_tail(queue_t *q, char *s)
     if (newh == NULL)
         return false;
 
-    newh->value = (char *) malloc((sizeof(s) / sizeof(s[0])) + 1);
+    newh->value = (char *) malloc(strlen(s) + 1);
     if (newh->value == NULL) {
         free(newh);
         return false;
     }
     strcpy(newh->value, s);
+    s = NULL;
 
     newh->next = NULL;
     if (q->size != 0) {
